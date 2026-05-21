@@ -1,6 +1,6 @@
 import time
 import random
-import requests
+import requests #type: ignore
 import logging
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
