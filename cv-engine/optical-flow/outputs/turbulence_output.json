@@ -1,0 +1,46 @@
+{
+  "session_id": "PRECIS-SESSION-001",
+  "timestamp": "2026-05-21T15:46:45Z",
+  "module": "turbulence_metrics",
+  "frame_index": 0,
+  "turbulence_analysis": {
+    "velocity_variance": 4.63,
+    "motion_entropy": 0.74,
+    "directional_variance": 38.2,
+    "instability_index": 0.68,
+    "turbulence_score": 0.71,
+    "turbulence_level": "HIGH"
+  },
+  "crowd_stability": {
+    "is_stable": false,
+    "is_chaotic": false,
+    "collapse_risk": true,
+    "stability_label": "UNSTABLE"
+  },
+  "passive_outstroke": {
+    "probability": 0.63,
+    "risk_label": "ELEVATED",
+    "estimated_victims_at_risk": 12,
+    "trigger_conditions": [
+      "HIGH velocity variance",
+      "Elevated motion entropy",
+      "Directional instability detected"
+    ]
+  },
+  "risk_classification": {
+    "level": 3,
+    "label": "HIGH RISK",
+    "color_code": "#FF4500",
+    "recommended_action": "ALERT crowd management — possible crowd compression forming"
+  },
+  "time_series_snapshot": [
+    { "frame": 0, "turbulence_score": 0.31 },
+    { "frame": 1, "turbulence_score": 0.44 },
+    { "frame": 2, "turbulence_score": 0.58 },
+    { "frame": 3, "turbulence_score": 0.71 }
+  ],
+  "output_files": {
+    "turbulence_report": "outputs/turbulence/turbulence_report_frame_0001.json",
+    "time_series_csv": "outputs/turbulence/turbulence_timeseries.csv"
+  }
+}
