@@ -1,0 +1,11 @@
+[project]
+name = "yolo-detector"
+version = "0.1.0"
+description = "YOLOv8 vision inference engine for PRECIS"
+requires-python = ">=3.10"
+dependencies = [
+    "ultralytics>=8.0.0",
+    "opencv-python-headless>=4.7.0",
+    "requests>=2.30.0",
+    "aiokafka>=0.8.1",
+]

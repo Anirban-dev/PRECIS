@@ -1,0 +1,14 @@
+[project]
+name = "api-gateway"
+version = "0.1.0"
+description = "FastAPI gateway for PRECIS Crowd Intelligence platform"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.100.0",
+    "uvicorn[standard]>=0.22.0",
+    "pydantic>=2.0.0",
+    "websockets>=11.0",
+    "nats-py>=2.4.0",
+    "aiokafka>=0.8.1",
+]
