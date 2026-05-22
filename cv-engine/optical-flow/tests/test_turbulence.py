@@ -17,7 +17,7 @@ sys.path.append(str(ROOT_DIR))
 # IMPORT TURBULENCE ENGINE
 # =========================================================
 
-from cv_engine.optical_flow.turbulence_metrics import (
+from turbulence_metrics import (
     TurbulenceMetricsEngine
 )
 
