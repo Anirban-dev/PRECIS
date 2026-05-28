@@ -1,0 +1,9 @@
+YOLO_MODEL = "yolov8n.pt"
+
+YOLO_CONFIDENCE = 0.5
+
+YOLO_IOU = 0.45
+
+YOLO_DEVICE = "cuda"
+
+YOLO_MAX_DETECTIONS = 300
