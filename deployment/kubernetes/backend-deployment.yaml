@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+
+kind: Deployment
+
+metadata:
+
+  name: precis-backend
+
+spec:
+
+  replicas: 2
+
+  selector:
+
+    matchLabels:
+
+      app: precis-backend
+
+  template:
+
+    metadata:
+
+      labels:
+
+        app: precis-backend
+
+    spec:
+
+      containers:
+
+        - name: backend
+
+          image: precis-backend:latest
+
+          ports:
+
+            - containerPort: 8000

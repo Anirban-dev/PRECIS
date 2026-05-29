@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+
+kind: Deployment
+
+metadata:
+
+  name: precis-nats
+
+spec:
+
+  replicas: 1
+
+  selector:
+
+    matchLabels:
+
+      app: precis-nats
+
+  template:
+
+    metadata:
+
+      labels:
+
+        app: precis-nats
+
+    spec:
+
+      containers:
+
+        - name: nats
+
+          image: nats:latest
+
+          ports:
+
+            - containerPort: 4222

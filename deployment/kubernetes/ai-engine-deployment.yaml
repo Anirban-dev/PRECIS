@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+
+kind: Deployment
+
+metadata:
+
+  name: precis-ai-engine
+
+spec:
+
+  replicas: 1
+
+  selector:
+
+    matchLabels:
+
+      app: precis-ai-engine
+
+  template:
+
+    metadata:
+
+      labels:
+
+        app: precis-ai-engine
+
+    spec:
+
+      containers:
+
+        - name: ai-engine
+
+          image: precis-ai:latest

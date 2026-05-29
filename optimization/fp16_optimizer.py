@@ -1,20 +1,26 @@
+import torch
+
+
 class FP16Optimizer:
 
     def optimize(
 
         self,
 
-        model_name
+        model
     ):
+
+        if torch.cuda.is_available():
+
+            model = model.half()
+
+        return model
+
+    def info(self):
 
         return {
 
-            "model":
-                model_name,
+            "fp16_enabled":
 
-            "precision":
-                "FP16",
-
-            "status":
-                "OPTIMIZED"
+                torch.cuda.is_available()
         }

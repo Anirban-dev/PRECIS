@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+
+kind: Deployment
+
+metadata:
+
+  name: precis-postgres
+
+spec:
+
+  replicas: 1
+
+  selector:
+
+    matchLabels:
+
+      app: precis-postgres
+
+  template:
+
+    metadata:
+
+      labels:
+
+        app: precis-postgres
+
+    spec:
+
+      containers:
+
+        - name: postgres
+
+          image: postgres:15
+
+          ports:
+
+            - containerPort: 5432

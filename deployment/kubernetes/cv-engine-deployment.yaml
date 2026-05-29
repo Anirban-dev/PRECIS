@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+
+kind: Deployment
+
+metadata:
+
+  name: precis-cv-engine
+
+spec:
+
+  replicas: 1
+
+  selector:
+
+    matchLabels:
+
+      app: precis-cv-engine
+
+  template:
+
+    metadata:
+
+      labels:
+
+        app: precis-cv-engine
+
+    spec:
+
+      containers:
+
+        - name: cv-engine
+
+          image: precis-cv:latest
