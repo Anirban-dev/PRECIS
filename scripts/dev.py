@@ -8,7 +8,7 @@ from pathlib import Path
 # Paths relative to the repository root
 REPO_ROOT = Path(__file__).resolve().parent.parent
 GATEWAY_PATH = REPO_ROOT / "services" / "api-gateway"
-YOLO_PATH = REPO_ROOT / "ai-engine" / "yolo"
+YOLO_PATH = REPO_ROOT / "ai_engine" / "yolo"
 CV_PATH = REPO_ROOT / "cv-engine" / "optical-flow"
 DASHBOARD_PATH = REPO_ROOT / "apps" / "dashboard"
 
@@ -56,7 +56,7 @@ def main():
         print("[✓] API Gateway environment setup complete.")
 
         # 2. Setup YOLO Engine
-        print("\n[*] Initializing ai-engine/yolo virtual environment...")
+        print("\n[*] Initializing ai_engine/yolo virtual environment...")
         subprocess.run(["uv", "pip", "compile", "pyproject.toml", "-o", "requirements.txt"], cwd=str(YOLO_PATH), shell=True)
         subprocess.run(["uv", "venv"], cwd=str(YOLO_PATH), shell=True)
         subprocess.run(["uv", "pip", "install", "-r", "requirements.txt"], cwd=str(YOLO_PATH), shell=True)
