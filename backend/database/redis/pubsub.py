@@ -1,28 +1,28 @@
-from .redis_client import redis_client
+from backend.database.redis.redis_client import (
+    RedisClient
+)
 
 
 class PubSubManager:
 
+    def __init__(self):
+
+        self.redis = (
+            RedisClient.get_client()
+        )
+
     def publish(
+
         self,
+
         channel,
+
         payload
     ):
 
-        redis_client.publish(
+        self.redis.publish(
+
             channel,
+
             payload
         )
-
-    def subscribe(
-        self,
-        channel
-    ):
-
-        subscriber = redis_client.pubsub()
-
-        subscriber.subscribe(
-            channel
-        )
-
-        return subscriber

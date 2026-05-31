@@ -1,43 +1,21 @@
-from sqlalchemy.orm import Session
-
-from ..models import EmergencyAlert
-
-
 class EmergencyRepository:
 
-    def __init__(
-        self,
-        db: Session
-    ):
-        self.db = db
+    def save_emergency(
 
-    def create(
         self,
-        title,
-        message
+
+        payload
     ):
 
-        alert = EmergencyAlert(
-            title=title,
-            message=message
-        )
+        return {
 
-        self.db.add(alert)
+            "status":
+                "SAVED",
 
-        self.db.commit()
+            "payload":
+                payload
+        }
 
-        self.db.refresh(alert)
+    def get_emergencies(self):
 
-        return alert
-
-    def active_alerts(self):
-
-        return (
-            self.db.query(
-                EmergencyAlert
-            )
-            .filter(
-                EmergencyAlert.active == True
-            )
-            .all()
-        )
+        return []

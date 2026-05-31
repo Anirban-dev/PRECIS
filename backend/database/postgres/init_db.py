@@ -1,12 +1,15 @@
-from .connection import engine
-from .models import (
-    CrowdAnalytics,
-    RiskEvent,
-    EmergencyAlert
+from backend.database.postgres.repositories.camera_repository import (
+    CameraRepository
 )
 
-def initialize_database():
+from backend.database.postgres.repositories.risk_repository import (
+    RiskRepository
+)
 
-    CrowdAnalytics.metadata.create_all(
-        bind=engine
-    )
+from backend.database.postgres.repositories.analytics_repository import (
+    AnalyticsRepository
+)
+
+from backend.database.postgres.repositories.emergency_repository import (
+    EmergencyRepository
+)

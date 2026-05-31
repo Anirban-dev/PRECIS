@@ -5,7 +5,7 @@ class WebSocketManager:
 
     def __init__(self):
 
-        self.active_connections = []
+        self.connections = []
 
     async def connect(
 
@@ -16,7 +16,7 @@ class WebSocketManager:
 
         await websocket.accept()
 
-        self.active_connections.append(
+        self.connections.append(
             websocket
         )
 
@@ -24,12 +24,12 @@ class WebSocketManager:
 
         self,
 
-        websocket: WebSocket
+        websocket
     ):
 
-        if websocket in self.active_connections:
+        if websocket in self.connections:
 
-            self.active_connections.remove(
+            self.connections.remove(
                 websocket
             )
 
@@ -42,7 +42,7 @@ class WebSocketManager:
 
         disconnected = []
 
-        for connection in self.active_connections:
+        for connection in self.connections:
 
             try:
 

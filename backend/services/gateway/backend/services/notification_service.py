@@ -1,96 +1,54 @@
 from datetime import datetime
-import logging
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s"
-)
-
-logger = logging.getLogger(
-    "notification-service"
-)
 
 
 class NotificationService:
 
-    def __init__(self):
-
-        logger.info(
-            "Initializing Notification Service..."
-        )
-
-    def send_notifications(
+    def broadcast_alert(
 
         self,
 
-        emergency_report
+        risk_level,
+
+        payload
     ):
 
-        logger.info(
-            "Sending emergency notifications..."
-        )
+        return {
 
-        responders = emergency_report.get(
-            "responders",
-            []
-        )
+            "risk_level":
+                risk_level,
 
-        notifications = []
+            "payload":
+                payload,
 
-        for responder in responders:
-
-            notifications.append({
-
-                "recipient":
-                    responder,
-
-                "status":
-                    "DELIVERED"
-            })
-
-        result = {
-
-            "timestamp":
+            "sent_at":
                 datetime.utcnow().isoformat(),
 
-            "notifications_sent":
-                len(notifications),
-
-            "delivery_status":
-                "SUCCESS",
-
-            "notifications":
-                notifications
+            "status":
+                "DELIVERED"
         }
 
-        logger.info(
+    def multispectral_alert(
 
-            f"[NOTIFICATIONS] "
+        self,
 
-            f"Sent={len(notifications)}"
-        )
+        camera_type,
 
-        return result
+        sensor_health,
 
+        message
+    ):
 
-if __name__ == "__main__":
+        return {
 
-    emergency_report = {
+            "camera_type":
+                camera_type,
 
-        "responders": [
+            "sensor_health":
+                sensor_health,
 
-            "Police Command Center",
+            "message":
+                message,
 
-            "Fire Brigade",
-
-            "Emergency Ambulance Network"
-        ]
-    }
-
-    service = NotificationService()
-
-    result = service.send_notifications(
-        emergency_report
-    )
-
-    print(result)
+            "status":
+                "SENT"
+        }

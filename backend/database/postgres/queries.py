@@ -1,44 +1,68 @@
-from sqlalchemy.orm import Session
+class CameraQueries:
 
-from .models import (
-    CrowdAnalytics,
-    RiskEvent,
-    EmergencyAlert
-)
+    CREATE_CAMERA = """
 
-
-def insert_analytics(
-    db: Session,
-    crowd_count: int,
-    density: float,
-    turbulence_score: float
-):
-
-    row = CrowdAnalytics(
-        crowd_count=crowd_count,
-        density=density,
-        turbulence_score=turbulence_score
+    INSERT INTO cameras
+    (
+        camera_id,
+        sector_id,
+        camera_type,
+        stream_url,
+        sensor_health
+    )
+    VALUES
+    (
+        :camera_id,
+        :sector_id,
+        :camera_type,
+        :stream_url,
+        :sensor_health
     )
 
-    db.add(row)
+    """
 
-    db.commit()
+    GET_CAMERA = """
 
-    db.refresh(row)
+    SELECT *
 
-    return row
+    FROM cameras
+
+    WHERE camera_id=:camera_id
+
+    """
 
 
-def fetch_recent_analytics(
-    db: Session,
-    limit: int = 20
-):
+class RiskQueries:
 
-    return (
-        db.query(CrowdAnalytics)
-        .order_by(
-            CrowdAnalytics.created_at.desc()
-        )
-        .limit(limit)
-        .all()
+    INSERT_RISK_EVENT = """
+
+    INSERT INTO risk_events
+    (
+        sector_id,
+        risk_level,
+        risk_score,
+        fusion_confidence,
+        camera_type
     )
+    VALUES
+    (
+        :sector_id,
+        :risk_level,
+        :risk_score,
+        :fusion_confidence,
+        :camera_type
+    )
+
+    """
+
+    GET_RECENT_RISKS = """
+
+    SELECT *
+
+    FROM risk_events
+
+    ORDER BY created_at DESC
+
+    LIMIT 100
+
+    """

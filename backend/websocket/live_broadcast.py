@@ -1,21 +1,47 @@
-from backend.websocket.websocket_manager import (
-    WebSocketManager
-)
+from collections import defaultdict
 
 
 class LiveBroadcast:
 
     def __init__(self):
 
-        self.manager = WebSocketManager()
+        self.channels = defaultdict(list)
 
-    async def send_event(
+    def subscribe(
 
         self,
 
-        event
+        channel,
+
+        websocket
     ):
 
-        await self.manager.broadcast(
-            event
+        self.channels[channel].append(
+            websocket
         )
+
+    async def broadcast(
+
+        self,
+
+        channel,
+
+        payload
+    ):
+
+        connections = self.channels.get(
+            channel,
+            []
+        )
+
+        for websocket in connections:
+
+            try:
+
+                await websocket.send_json(
+                    payload
+                )
+
+            except Exception:
+
+                pass

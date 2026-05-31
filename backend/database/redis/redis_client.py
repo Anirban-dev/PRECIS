@@ -3,17 +3,20 @@ import redis
 
 class RedisClient:
 
-    def __init__(self):
+    _client = None
 
-        self.client = redis.Redis(
-            host="localhost",
-            port=6379,
-            decode_responses=True
-        )
+    @classmethod
+    def get_client(cls):
 
-    def get_client(self):
+        if cls._client is None:
 
-        return self.client
+            cls._client = redis.Redis(
 
+                host="localhost",
 
-redis_client = RedisClient().get_client()
+                port=6379,
+
+                decode_responses=True
+            )
+
+        return cls._client

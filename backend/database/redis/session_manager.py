@@ -1,43 +1,42 @@
 import json
 
-from .redis_client import redis_client
+from backend.database.redis.redis_client import (
+    RedisClient
+)
 
 
 class SessionManager:
 
+    def __init__(self):
+
+        self.redis = (
+            RedisClient.get_client()
+        )
+
     def create_session(
+
         self,
-        session_id,
-        payload,
-        ttl=3600
+
+        user_id,
+
+        data
     ):
 
-        redis_client.setex(
-            session_id,
-            ttl,
-            json.dumps(payload)
+        self.redis.set(
+
+            f"session:{user_id}",
+
+            json.dumps(data)
         )
 
     def get_session(
+
         self,
-        session_id
+
+        user_id
     ):
 
-        data = redis_client.get(
-            session_id
-        )
+        return self.redis.get(
 
-        if not data:
-
-            return None
-
-        return json.loads(data)
-
-    def delete_session(
-        self,
-        session_id
-    ):
-
-        redis_client.delete(
-            session_id
+            f"session:{user_id}"
         )

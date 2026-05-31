@@ -1,45 +1,21 @@
-from sqlalchemy.orm import Session
-
-from ..models import RiskEvent
-
-
 class RiskRepository:
 
-    def __init__(
-        self,
-        db: Session
-    ):
-        self.db = db
+    def save_risk_event(
 
-    def create(
         self,
-        event_type,
-        risk_level,
-        confidence,
-        metadata
+
+        payload
     ):
 
-        event = RiskEvent(
-            event_type=event_type,
-            risk_level=risk_level,
-            confidence=confidence,
-            metadata=metadata
-        )
+        return {
 
-        self.db.add(event)
+            "status":
+                "SAVED",
 
-        self.db.commit()
+            "payload":
+                payload
+        }
 
-        self.db.refresh(event)
+    def get_recent_events(self):
 
-        return event
-
-    def all(self):
-
-        return (
-            self.db.query(RiskEvent)
-            .order_by(
-                RiskEvent.created_at.desc()
-            )
-            .all()
-        )
+        return []

@@ -3,31 +3,50 @@ from datetime import datetime
 from sqlalchemy import (
     Column,
     Integer,
-    String,
     Float,
-    DateTime,
-    Boolean,
-    JSON
+    String,
+    DateTime
 )
 
-from .connection import Base
+from sqlalchemy.orm import declarative_base
 
 
-class CrowdAnalytics(Base):
+Base = declarative_base()
 
-    __tablename__ = "crowd_analytics"
+
+class Camera(Base):
+
+    __tablename__ = "cameras"
 
     id = Column(
         Integer,
-        primary_key=True,
-        index=True
+        primary_key=True
     )
 
-    crowd_count = Column(Integer)
+    camera_id = Column(
+        String,
+        unique=True,
+        nullable=False
+    )
 
-    density = Column(Float)
+    sector_id = Column(
+        String,
+        nullable=False
+    )
 
-    turbulence_score = Column(Float)
+    camera_type = Column(
+        String,
+        nullable=False
+    )
+
+    stream_url = Column(
+        String
+    )
+
+    sensor_health = Column(
+        String,
+        default="HEALTHY"
+    )
 
     created_at = Column(
         DateTime,
@@ -41,41 +60,27 @@ class RiskEvent(Base):
 
     id = Column(
         Integer,
-        primary_key=True,
-        index=True
+        primary_key=True
     )
 
-    event_type = Column(String)
-
-    risk_level = Column(String)
-
-    confidence = Column(Float)
-
-    metadata = Column(JSON)
-
-    created_at = Column(
-        DateTime,
-        default=datetime.utcnow
+    sector_id = Column(
+        String
     )
 
-
-class EmergencyAlert(Base):
-
-    __tablename__ = "emergency_alerts"
-
-    id = Column(
-        Integer,
-        primary_key=True,
-        index=True
+    risk_level = Column(
+        String
     )
 
-    title = Column(String)
+    risk_score = Column(
+        Float
+    )
 
-    message = Column(String)
+    fusion_confidence = Column(
+        Float
+    )
 
-    active = Column(
-        Boolean,
-        default=True
+    camera_type = Column(
+        String
     )
 
     created_at = Column(

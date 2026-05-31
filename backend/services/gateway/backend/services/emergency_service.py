@@ -1,132 +1,68 @@
 from datetime import datetime
-import logging
-import random
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s"
-)
-
-logger = logging.getLogger(
-    "emergency-service"
-)
 
 
 class EmergencyService:
 
-    def __init__(self):
-
-        logger.info(
-            "Initializing Emergency Coordination Service..."
-        )
-
-    def dispatch_emergency(
+    def generate_response(
 
         self,
 
-        risk_report,
+        risk_level,
 
-        location="Unknown Zone"
+        sector_id,
+
+        sensor_health
     ):
 
-        logger.info(
-            "Processing emergency dispatch..."
-        )
+        recommendations = {
 
-        risk_level = risk_report.get(
-            "risk_level",
-            "LOW"
-        )
+            "LOW": [
 
-        responders = []
+                "Continue monitoring"
+            ],
 
-        if risk_level == "HIGH":
+            "MEDIUM": [
 
-            responders.extend([
+                "Increase surveillance",
 
-                "Venue Security",
+                "Prepare crowd control team"
+            ],
 
-                "Crowd Response Unit"
-            ])
+            "HIGH": [
 
-        elif risk_level == "SEVERE":
+                "Open alternate routes",
 
-            responders.extend([
+                "Deploy security personnel"
+            ],
 
-                "Police Response Team",
+            "CRITICAL": [
 
-                "Rapid Rescue Unit",
+                "Immediate evacuation",
 
-                "Ambulance Dispatch"
-            ])
+                "Activate emergency protocol",
 
-        elif risk_level == "CRITICAL":
+                "Notify authorities"
+            ]
+        }
 
-            responders.extend([
+        return {
 
-                "Disaster Response Force",
-
-                "Police Command Center",
-
-                "Emergency Ambulance Network",
-
-                "Nearby Hospitals",
-
-                "Fire Brigade"
-            ])
-
-        emergency_id = (
-            f"EMG-"
-            f"{random.randint(1000,9999)}"
-        )
-
-        report = {
-
-            "timestamp":
-                datetime.utcnow().isoformat(),
-
-            "emergency_id":
-                emergency_id,
-
-            "location":
-                location,
+            "sector_id":
+                sector_id,
 
             "risk_level":
                 risk_level,
 
-            "responders":
-                responders,
+            "sensor_health":
+                sensor_health,
 
-            "dispatch_status":
-                "ACTIVE"
+            "actions":
+
+                recommendations.get(
+                    risk_level,
+                    []
+                ),
+
+            "timestamp":
+                datetime.utcnow().isoformat()
         }
-
-        logger.info(
-
-            f"[EMERGENCY] "
-
-            f"Risk={risk_level} | "
-
-            f"Location={location}"
-        )
-
-        return report
-
-
-if __name__ == "__main__":
-
-    risk_report = {
-
-        "risk_level": "CRITICAL"
-    }
-
-    service = EmergencyService()
-
-    result = service.dispatch_emergency(
-
-        risk_report,
-
-        "Gate A"
-    )
-
-    print(result)

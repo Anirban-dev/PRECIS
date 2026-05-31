@@ -1,38 +1,43 @@
-from .redis_client import redis_client
+from backend.database.redis.redis_client import (
+    RedisClient
+)
 
 
 class CacheManager:
 
-    def set_cache(
+    def __init__(self):
+
+        self.redis = (
+            RedisClient.get_client()
+        )
+
+    def set(
+
         self,
+
         key,
+
         value,
-        expiry=300
+
+        ttl=300
     ):
 
-        redis_client.setex(
+        self.redis.setex(
+
             key,
-            expiry,
+
+            ttl,
+
             value
         )
 
-    def get_cache(
+    def get(
+
         self,
+
         key
     ):
 
-        return redis_client.get(key)
-
-    def delete_cache(
-        self,
-        key
-    ):
-
-        redis_client.delete(key)
-
-    def exists(
-        self,
-        key
-    ):
-
-        return redis_client.exists(key)
+        return self.redis.get(
+            key
+        )
