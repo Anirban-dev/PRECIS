@@ -16,9 +16,13 @@ from backend.api.routes.auth_routes import (
     router as auth_router
 )
 
-# 1. Added the new camera routes import
 from backend.api.routes.camera_routes import (
     router as camera_router
+)
+
+# ✅ Added the new predict routes import
+from backend.api.routes.predict_routes import (
+    router as predict_router
 )
 
 app = FastAPI(
@@ -41,9 +45,13 @@ app.include_router(
     auth_router
 )
 
-# 2. Included the camera router into the FastAPI app instance
 app.include_router(
     camera_router
+)
+
+# ✅ Included the predict router
+app.include_router(
+    predict_router
 )
 
 

@@ -35,37 +35,21 @@ class PredictivePipeline:
 
     def __init__(self):
 
-        self.thermal_detector = (
-            ThermalDetector()
-        )
+        self.thermal_detector = ThermalDetector()
 
-        self.infrared_detector = (
-            InfraredDetector()
-        )
+        self.infrared_detector = InfraredDetector()
 
-        self.fusion = (
-            SpectralFusion()
-        )
+        self.fusion = SpectralFusion()
 
-        self.flow_classifier = (
-            CrowdFlowClassifier()
-        )
+        self.flow_classifier = CrowdFlowClassifier()
 
-        self.panic_engine = (
-            PanicScoreEngine()
-        )
+        self.panic_engine = PanicScoreEngine()
 
-        self.forecaster = (
-            RiskForecaster()
-        )
+        self.forecaster = RiskForecaster()
 
-        self.predictor = (
-            StampedePredictor()
-        )
+        self.predictor = StampedePredictor()
 
-        self.risk_service = (
-            RiskService()
-        )
+        self.risk_service = RiskService()
 
     def execute(
 
@@ -82,93 +66,68 @@ class PredictivePipeline:
         turbulence_score
     ):
 
-        fused_density = (
+        fused_density = self.fusion.fuse_density(
 
-            self.fusion.fuse_density_maps(
+            rgb_density,
 
-                rgb_density,
+            thermal_density,
 
-                thermal_density
-            )
+            infrared_density
         )
 
-        crowd_flow = (
+        crowd_flow = self.flow_classifier.classify(
 
-            self.flow_classifier.classify(
-
-                flow_vectors
-            )
+            flow_vectors
         )
 
-        panic_result = (
+        panic_result = self.panic_engine.calculate(
 
-            self.panic_engine.calculate(
+            density_score=sum(
+                fused_density
+            ) / len(
+                fused_density
+            ),
 
-                density_score=sum(
-                    fused_density
-                ) / len(
-                    fused_density
-                ),
+            turbulence_score=turbulence_score,
 
-                turbulence_score=
-                    turbulence_score,
+            shockwave_score=25,
 
-                shockwave_score=25,
-
-                trajectory_score=20
-            )
+            trajectory_score=20
         )
 
-        forecast = (
+        forecast = self.forecaster.forecast(
 
-            self.forecaster.forecast(
+            fused_density,
 
-                fused_density,
-
-                flow_vectors
-            )
+            flow_vectors
         )
 
-        prediction = (
+        prediction = self.predictor.predict(
 
-            self.predictor.predict(
+            density_score=panic_result[
+                "panic_score"
+            ],
 
-                density_score=
-                    panic_result[
-                        "panic_score"
-                    ],
+            turbulence_score=turbulence_score,
 
-                turbulence_score=
-                    turbulence_score,
+            pressure_score=forecast[
+                "pressure_score"
+            ],
 
-                pressure_score=
-                    forecast[
-                        "pressure_score"
-                    ],
-
-                panic_score=
-                    panic_result[
-                        "panic_score"
-                    ]
-            )
+            panic_score=panic_result[
+                "panic_score"
+            ]
         )
 
-        risk = (
+        risk = self.risk_service.calculate_risk(
 
-            self.risk_service.calculate_risk(
+            density_map=fused_density,
 
-                density_map=
-                    fused_density,
+            turbulence_score=turbulence_score,
 
-                turbulence_score=
-                    turbulence_score,
+            fusion_confidence=0.95,
 
-                fusion_confidence=
-                    0.95,
-
-                sensor_health=
-                    "HEALTHY"
-            )
+            sensor_health="HEALTHY"
         )
 
         return {

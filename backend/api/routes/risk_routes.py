@@ -1,33 +1,49 @@
 from fastapi import APIRouter
 
-from backend.services.risk_service import (
-    RiskService
+from system_integration.predictive_pipeline import (
+    PredictivePipeline
 )
 
 router = APIRouter(
-    prefix="/risk",
-    tags=["Risk"]
+    prefix="/predict",
+    tags=["Prediction"]
 )
 
-risk_service = RiskService()
+pipeline = PredictivePipeline()
 
 
-@router.post("/evaluate")
-async def evaluate_risk(payload: dict):
+@router.post("/")
+async def predict(payload: dict):
 
-    return risk_service.calculate_risk(
+    result = pipeline.execute(
 
-        density_map=payload["density_map"],
+        rgb_density=payload.get(
+            "rgb_density",
+            [10, 20, 30]
+        ),
 
-        turbulence_score=payload[
-            "turbulence_score"
-        ],
+        thermal_density=payload.get(
+            "thermal_density",
+            [12, 18, 28]
+        ),
 
-        fusion_confidence=payload[
-            "fusion_confidence"
-        ],
+        infrared_density=payload.get(
+            "infrared_density",
+            [11, 19, 27]
+        ),
 
-        sensor_health=payload[
-            "sensor_health"
-        ]
+        flow_vectors=payload.get(
+            "flow_vectors",
+            [
+                [1, 0],
+                [0, 1]
+            ]
+        ),
+
+        turbulence_score=payload.get(
+            "turbulence_score",
+            12
+        )
     )
+
+    return result
