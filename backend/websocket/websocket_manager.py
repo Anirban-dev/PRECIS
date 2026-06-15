@@ -20,6 +20,10 @@ class WebSocketManager:
             websocket
         )
 
+        print(
+            f"WebSocket connected. Active connections: {len(self.connections)}"
+        )
+
     def disconnect(
 
         self,
@@ -33,12 +37,21 @@ class WebSocketManager:
                 websocket
             )
 
+            print(
+                f"WebSocket disconnected. Active connections: {len(self.connections)}"
+            )
+
     async def broadcast(
 
         self,
 
         payload
     ):
+
+        print(
+            "Broadcasting payload:",
+            payload
+        )
 
         disconnected = []
 
@@ -50,7 +63,12 @@ class WebSocketManager:
                     payload
                 )
 
-            except Exception:
+            except Exception as e:
+
+                print(
+                    "Broadcast failed:",
+                    str(e)
+                )
 
                 disconnected.append(
                     connection
