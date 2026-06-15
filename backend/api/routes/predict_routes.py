@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from system_integration.predictive_pipeline import PredictivePipeline
+from backend.api.routes.websocket_routes import manager
 import traceback
 
 router = APIRouter(
@@ -12,6 +13,7 @@ pipeline = PredictivePipeline()
 
 @router.post("/")
 async def predict(payload: dict):
+
     try:
 
         result = pipeline.execute(
@@ -43,6 +45,13 @@ async def predict(payload: dict):
                 "turbulence_score",
                 12
             )
+        )
+
+        await manager.broadcast(
+            {
+                "event": "prediction_update",
+                "data": result
+            }
         )
 
         return {
