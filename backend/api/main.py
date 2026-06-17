@@ -1,4 +1,10 @@
 from fastapi import FastAPI
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s"
+)
 
 from backend.api.routes.analytics_routes import (
     router as analytics_router
@@ -28,41 +34,30 @@ from backend.api.routes.websocket_routes import (
     router as websocket_router
 )
 
+from backend.api.routes.incident_routes import (
+    router as incident_router
+)
+
+from backend.api.routes.dashboard_routes import (
+    router as dashboard_router
+)
+
 app = FastAPI(
     title="PRECIS API"
 )
 
-app.include_router(
-    analytics_router
-)
-
-app.include_router(
-    risk_router
-)
-
-app.include_router(
-    emergency_router
-)
-
-app.include_router(
-    auth_router
-)
-
-app.include_router(
-    camera_router
-)
-
-app.include_router(
-    predict_router
-)
-
-app.include_router(
-    websocket_router
-)
+app.include_router(analytics_router)
+app.include_router(risk_router)
+app.include_router(emergency_router)
+app.include_router(auth_router)
+app.include_router(camera_router)
+app.include_router(predict_router)
+app.include_router(websocket_router)
+app.include_router(incident_router)
+app.include_router(dashboard_router)
 
 @app.get("/health")
 async def health():
-
     return {
         "status": "healthy"
     }

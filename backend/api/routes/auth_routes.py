@@ -4,6 +4,10 @@ from backend.security.jwt_handler import (
     create_access_token
 )
 
+from backend.api.schemas.auth_schema import (
+    LoginRequest
+)
+
 router = APIRouter(
     prefix="/auth",
     tags=["Auth"]
@@ -11,20 +15,22 @@ router = APIRouter(
 
 
 @router.post("/login")
-async def login(payload: dict):
+async def login(
+    request: LoginRequest
+):
 
-    username = payload.get(
-        "username"
+    token = create_access_token(
+
+        {
+            "sub": request.username
+        }
     )
-
-    token = create_access_token({
-
-        "sub": username
-    })
 
     return {
 
         "access_token": token,
 
-        "token_type": "bearer"
+        "token_type": "bearer",
+
+        "username": request.username
     }
