@@ -1,0 +1,43 @@
+{
+  "session_id": "PRECIS-SESSION-001",
+  "timestamp": "2026-05-21T15:46:45Z",
+  "module": "heatmap_generator",
+  "frame_index": 0,
+  "heatmap_metadata": {
+    "width": 1280,
+    "height": 720,
+    "colormap": "JET",
+    "normalize": true,
+    "overlay_alpha": 0.6
+  },
+  "pressure_zones": [
+    {
+      "zone_id": "ZONE-001",
+      "centroid": [640, 360],
+      "bounding_box": [580, 300, 700, 420],
+      "intensity": 0.87,
+      "risk_level": "HIGH",
+      "area_pixels": 14400
+    },
+    {
+      "zone_id": "ZONE-002",
+      "centroid": [320, 200],
+      "bounding_box": [280, 160, 360, 240],
+      "intensity": 0.54,
+      "risk_level": "MEDIUM",
+      "area_pixels": 6400
+    }
+  ],
+  "global_stats": {
+    "max_intensity": 0.87,
+    "mean_intensity": 0.42,
+    "dangerous_zone_count": 1,
+    "medium_zone_count": 1,
+    "safe_zone_count": 4
+  },
+  "output_files": {
+    "heatmap_image": "outputs/heatmaps/heatmap_frame_0001.png",
+    "overlay_image": "outputs/heatmaps/overlay_frame_0001.png",
+    "risk_mask": "outputs/heatmaps/risk_mask_frame_0001.png"
+  }
+}

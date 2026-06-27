@@ -1,0 +1,51 @@
+{
+  "session_id": "PRECIS-SESSION-001",
+  "timestamp": "2026-05-21T15:46:45Z",
+  "module": "optical_flow",
+  "frame_index": 0,
+  "frame_pair": {
+    "prev_frame": "frame_0000.jpg",
+    "curr_frame": "frame_0001.jpg"
+  },
+  "flow_stats": {
+    "mean_magnitude": 3.72,
+    "max_magnitude": 18.45,
+    "min_magnitude": 0.01,
+    "std_magnitude": 2.14,
+    "mean_angle_deg": 112.3,
+    "dominant_direction": "LEFT-DOWN",
+    "motion_coverage_pct": 68.4
+  },
+  "crowd_drift": {
+    "drift_x": -1.84,
+    "drift_y": 2.37,
+    "drift_magnitude": 2.99,
+    "drift_direction_deg": 128.0,
+    "drift_label": "SOUTH-WEST"
+  },
+  "motion_zones": [
+    {
+      "zone": "CENTER",
+      "mean_magnitude": 6.81,
+      "dominant_angle_deg": 95.0,
+      "risk_flag": true
+    },
+    {
+      "zone": "LEFT",
+      "mean_magnitude": 2.10,
+      "dominant_angle_deg": 180.0,
+      "risk_flag": false
+    },
+    {
+      "zone": "RIGHT",
+      "mean_magnitude": 1.55,
+      "dominant_angle_deg": 0.0,
+      "risk_flag": false
+    }
+  ],
+  "output_files": {
+    "flow_visualization": "outputs/optical_flow/flow_vis_frame_0001.png",
+    "motion_vectors": "outputs/optical_flow/vectors_frame_0001.png",
+    "flow_video": "outputs/optical_flow/flow_output.avi"
+  }
+}

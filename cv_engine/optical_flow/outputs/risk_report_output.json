@@ -1,0 +1,74 @@
+{
+  "session_id": "PRECIS-SESSION-001",
+  "timestamp": "2026-05-21T15:46:45Z",
+  "module": "risk_scoring",
+  "report_type": "CROWD_CRITICALITY_INDEX",
+  "frame_index": 0,
+  "cci": {
+    "score": 0.76,
+    "level": 4,
+    "label": "CRITICAL",
+    "color_code": "#FF0000",
+    "threshold_breached": true
+  },
+  "input_signals": {
+    "yolo_crowd_density": {
+      "person_count": 214,
+      "density_score": 0.82,
+      "weight": 0.25
+    },
+    "optical_flow_turbulence": {
+      "turbulence_score": 0.71,
+      "weight": 0.20
+    },
+    "crowd_resonance": {
+      "resonance_score": 0.65,
+      "wave_detected": true,
+      "weight": 0.20
+    },
+    "motion_synchronization": {
+      "sync_score": 0.58,
+      "sway_detected": true,
+      "weight": 0.15
+    },
+    "acoustic_stress": {
+      "decibel_level": 91.4,
+      "stress_score": 0.70,
+      "weight": 0.10
+    },
+    "shockwave_signals": {
+      "shockwave_detected": true,
+      "shockwave_intensity": 0.61,
+      "weight": 0.10
+    }
+  },
+  "passive_outstroke_intelligence": {
+    "probability": 0.68,
+    "risk_label": "HIGH",
+    "estimated_at_risk": 18
+  },
+  "emergency_dispatch": {
+    "dispatch_recommended": true,
+    "priority": "P1 — IMMEDIATE",
+    "estimated_response_window_sec": 90,
+    "units_recommended": 4
+  },
+  "preventive_actions": [
+    "IMMEDIATELY alert on-ground crowd marshals to sector ALPHA-3",
+    "Activate crowd steering barriers on NORTH-EAST corridor",
+    "Broadcast PA system dispersal guidance",
+    "Initiate emergency ingress lock on Gate-7",
+    "Alert medical standby — passive outstroke risk elevated"
+  ],
+  "shockwave_status": {
+    "detected": true,
+    "origin_zone": "CENTER-LEFT",
+    "propagation_direction": "EAST",
+    "estimated_reach_sec": 12
+  },
+  "output_files": {
+    "full_report_json": "outputs/risk_reports/risk_report_frame_0001.json",
+    "summary_pdf": "outputs/risk_reports/risk_summary_frame_0001.pdf",
+    "cci_timeseries": "outputs/risk_reports/cci_timeseries.csv"
+  }
+}
