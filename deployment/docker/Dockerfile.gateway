@@ -4,21 +4,12 @@ WORKDIR /app
 
 COPY requirements.txt .
 
-RUN pip install -r requirements.txt
+RUN pip install \
+    --default-timeout=1000 \
+    --retries=10 \
+    --no-cache-dir \
+    -r requirements.txt
 
 COPY . .
 
-CMD [
-
-    "uvicorn",
-
-    "gateway.main:app",
-
-    "--host",
-
-    "0.0.0.0",
-
-    "--port",
-
-    "8080"
-]
+CMD ["uvicorn", "gateway.main:app", "--host", "0.0.0.0", "--port", "8080"]
