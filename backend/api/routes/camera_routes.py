@@ -8,6 +8,7 @@ from backend.api.schemas.camera_start_request import CameraStartRequest
 from backend.services.camera_service import CameraService
 from backend.services.camera_health import CameraHealth
 from backend.services.camera_registry import CameraRegistry
+from backend.services.camera_registry import get_camera_registry
 from backend.security.auth_dependency import get_current_user
 
 router = APIRouter(
@@ -17,7 +18,7 @@ router = APIRouter(
 
 camera_service = CameraService()
 health = CameraHealth()
-camera_registry = CameraRegistry()
+camera_registry = get_camera_registry()
 
 
 @router.post("/register")
@@ -33,19 +34,6 @@ async def register_camera(camera: CameraSchema):
 @router.get("/list")
 async def list_cameras():
     return camera_registry.all()
-
-
-@router.get("/{camera_id}")
-async def get_camera(camera_id: str):
-    camera = camera_registry.get(camera_id)
-
-    if not camera:
-        return {
-            "success": False,
-            "message": "Camera not found"
-        }
-
-    return camera
 
 
 @router.post(
@@ -92,3 +80,16 @@ async def camera_status(camera_id: str):
 async def camera_health():
     status = camera_service.status()
     return health.check(status["running"])
+
+
+@router.get("/{camera_id}")
+async def get_camera(camera_id: str):
+    camera = camera_registry.get(camera_id)
+
+    if not camera:
+        return {
+            "success": False,
+            "message": "Camera not found"
+        }
+
+    return camera

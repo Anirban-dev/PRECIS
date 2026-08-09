@@ -1,11 +1,15 @@
-from fastapi import APIRouter, Depends
+import logging
+
+from fastapi import APIRouter, Depends, HTTPException
 from system_integration.predictive_pipeline import PredictivePipeline
 from backend.api.routes.websocket_routes import manager
 from backend.api.schemas.predict_schema import PredictRequest
+from backend.api.schemas.predict_response import PredictResponse
 from backend.security.auth_dependency import get_current_user
 from backend.services.incident_service import IncidentService
 from backend.services.alert_service import AlertService
-import traceback
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/predict",
@@ -16,7 +20,7 @@ pipeline = PredictivePipeline()
 incident_service = IncidentService()
 alert_service = AlertService()
 
-@router.post("/")
+@router.post("/", response_model=PredictResponse, operation_id="run_prediction")
 async def predict(
     payload: PredictRequest,
     user=Depends(get_current_user)
@@ -32,8 +36,8 @@ async def predict(
 
         risk_level = result["risk"]["risk_level"]
 
-        if risk_level in ["MEDIUM", "HIGH"]:
-            incident_service.create_incident(
+        if risk_level in ["MEDIUM", "HIGH", "CRITICAL"]:
+            incident = incident_service.create_incident(
                 camera_id="gate_a",
                 density=len(payload.rgb_density),
                 risk_level=risk_level
@@ -47,7 +51,8 @@ async def predict(
             await manager.broadcast(
                 {
                     "event": "alert",
-                    "data": alert
+                    "data": alert,
+                    "incident": incident
                 }
             )
 
@@ -63,10 +68,11 @@ async def predict(
             "result": result
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
-        return {
-            "success": False,
-            "error_type": type(e).__name__,
-            "error": str(e),
-            "traceback": traceback.format_exc()
-        }
+        logger.exception("Prediction pipeline failed")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Prediction pipeline failed: {type(e).__name__}"
+        ) from e

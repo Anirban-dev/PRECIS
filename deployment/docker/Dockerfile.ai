@@ -12,4 +12,4 @@ RUN pip install \
 
 COPY . .
 
-CMD ["python", "ai_engine/main.py"]
+CMD ["uvicorn", "ai_engine.yolo.inference.services.ai_services.main:app", "--host", "0.0.0.0", "--port", "9000"]

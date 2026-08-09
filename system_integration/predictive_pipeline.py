@@ -1,11 +1,3 @@
-from ai_engine.multispectral.thermal_detector import (
-    ThermalDetector
-)
-
-from ai_engine.multispectral.infrared_detector import (
-    InfraredDetector
-)
-
 from ai_engine.multispectral.spectral_fusion import (
     SpectralFusion
 )
@@ -42,8 +34,6 @@ from cv_engine.shockwave.shockwave_detector import (
 class PredictivePipeline:
 
     def __init__(self):
-        self.thermal_detector = ThermalDetector()
-        self.infrared_detector = InfraredDetector()
         self.fusion = SpectralFusion()
         self.flow_classifier = CrowdFlowClassifier()
         self.panic_engine = PanicScoreEngine()

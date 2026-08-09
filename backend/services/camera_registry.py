@@ -61,3 +61,10 @@ class CameraRegistry:
         del self.registry[camera_id]
 
         return True
+
+
+_shared_registry = CameraRegistry()
+
+
+def get_camera_registry():
+    return _shared_registry

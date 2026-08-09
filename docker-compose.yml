@@ -1,21 +1,65 @@
 version: "3.9"
 
 services:
-  precis:
+  backend:
     build:
       context: .
-      dockerfile: Dockerfile
-
-    container_name: precis
-
+      dockerfile: deployment/docker/Dockerfile.backend
+    environment:
+      PRECIS_JWT_SECRET: ${PRECIS_JWT_SECRET:-change-me-for-local-development}
     ports:
       - "8000:8000"
+    volumes:
+      - .:/app
+    restart: unless-stopped
 
+  gateway:
+    build:
+      context: .
+      dockerfile: deployment/docker/Dockerfile.gateway
+    environment:
+      PRECIS_BACKEND_URL: http://backend:8000
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend
+    volumes:
+      - .:/app
+    restart: unless-stopped
+
+  cv_engine:
+    build:
+      context: .
+      dockerfile: deployment/docker/Dockerfile.cv
+    profiles: ["engines"]
     volumes:
       - .:/app
 
-    restart: unless-stopped
+  ai_engine:
+    build:
+      context: .
+      dockerfile: deployment/docker/Dockerfile.ai
+    profiles: ["engines"]
+    ports:
+      - "9000:9000"
+    volumes:
+      - .:/app
 
-    stdin_open: true
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: precis
+    ports:
+      - "5432:5432"
 
-    tty: true
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  nats:
+    image: nats:latest
+    ports:
+      - "4222:4222"

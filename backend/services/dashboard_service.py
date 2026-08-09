@@ -10,12 +10,14 @@ class DashboardService:
         data = self.incident_service.get_all()
         incidents = data["incidents"]
 
+        critical = sum(1 for i in incidents if i["risk_level"] == "CRITICAL")
         high = sum(1 for i in incidents if i["risk_level"] == "HIGH")
         medium = sum(1 for i in incidents if i["risk_level"] == "MEDIUM")
 
         return {
             "total_incidents": len(incidents),
-            "high_risk": high,
+            "critical_risk": critical,
+            "high_risk": high + critical,
             "medium_risk": medium
         }
 
@@ -32,7 +34,7 @@ class DashboardService:
         data = self.incident_service.get_all()
         incidents = data["incidents"]
 
-        distribution = {"LOW": 0, "MEDIUM": 0, "HIGH": 0}
+        distribution = {"LOW": 0, "MEDIUM": 0, "HIGH": 0, "CRITICAL": 0}
 
         for incident in incidents:
             level = incident["risk_level"]

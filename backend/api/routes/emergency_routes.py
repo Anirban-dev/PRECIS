@@ -3,6 +3,10 @@ from fastapi import APIRouter
 from backend.services.emergency_service import (
     EmergencyService
 )
+from backend.api.schemas.emergency_schema import (
+    EmergencyRecommendationRequest,
+    EmergencyRecommendationResponse
+)
 
 router = APIRouter(
     prefix="/emergency",
@@ -12,14 +16,14 @@ router = APIRouter(
 service = EmergencyService()
 
 
-@router.post("/recommend")
-async def recommend(payload: dict):
+@router.post("/recommend", response_model=EmergencyRecommendationResponse)
+async def recommend(payload: EmergencyRecommendationRequest):
 
     return service.generate_response(
 
-        payload["risk_level"],
+        payload.risk_level,
 
-        payload["sector_id"],
+        payload.sector_id,
 
-        payload["sensor_health"]
+        payload.sensor_health
     )

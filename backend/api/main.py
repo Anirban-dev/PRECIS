@@ -46,15 +46,15 @@ app = FastAPI(
     title="PRECIS API"
 )
 
-app.include_router(analytics_router)
-app.include_router(risk_router)
-app.include_router(emergency_router)
-app.include_router(auth_router)
-app.include_router(camera_router)
-app.include_router(predict_router)
-app.include_router(websocket_router)
-app.include_router(incident_router)
-app.include_router(dashboard_router)
+# app.include_router(analytics_router)
+# app.include_router(risk_router)
+# app.include_router(emergency_router)
+# app.include_router(auth_router)
+# app.include_router(camera_router)
+# app.include_router(predict_router)
+# app.include_router(websocket_router)
+# app.include_router(incident_router)
+# app.include_router(dashboard_router)
 
 @app.get("/health")
 async def health():

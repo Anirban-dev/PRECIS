@@ -27,7 +27,7 @@ class WebSocketManager:
         )
 
         disconnected = []
-        for connection in self.connections:
+        for connection in list(self.connections):
             try:
                 await connection.send_json(payload)
             except Exception as e:

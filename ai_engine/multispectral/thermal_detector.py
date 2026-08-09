@@ -1,18 +1,26 @@
+import logging
+import os
+from pathlib import Path
+
 from ultralytics import YOLO
+
+logger = logging.getLogger(__name__)
 
 
 class ThermalDetector:
 
     def __init__(
         self,
-        model_path="ai_engine/models/thermal_yolov8.pt"
+        model_path=None
     ):
-        self.model = YOLO(
-            model_path
+        default_model_path = (
+            Path(__file__).resolve().parents[1] / "models" / "thermal_yolov8.pt"
         )
-        
-        # Warm up the model at startup using your targeted resolution
-        self.model.predict(source=None, imgsz=640, verbose=False)
+        configured_path = model_path or os.getenv(
+            "PRECIS_THERMAL_MODEL_PATH",
+            str(default_model_path)
+        )
+        self.model = YOLO(configured_path)
 
     def detect(
         self,

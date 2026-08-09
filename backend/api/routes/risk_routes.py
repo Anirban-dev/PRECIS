@@ -1,49 +1,30 @@
-from fastapi import APIRouter
+from typing import Literal
 
-from system_integration.predictive_pipeline import (
-    PredictivePipeline
-)
+from fastapi import APIRouter
+from pydantic import BaseModel
+
+from backend.services.risk_service import RiskService
 
 router = APIRouter(
-    prefix="/predict",
-    tags=["Prediction"]
+    prefix="/risk",
+    tags=["Risk"]
 )
 
-pipeline = PredictivePipeline()
+risk_service = RiskService()
 
 
-@router.post("/")
-async def predict(payload: dict):
+class RiskRequest(BaseModel):
+    density_map: list[float]
+    turbulence_score: float
+    fusion_confidence: float = 0.95
+    sensor_health: Literal["HEALTHY", "DEGRADED", "OFFLINE"] = "HEALTHY"
 
-    result = pipeline.execute(
 
-        rgb_density=payload.get(
-            "rgb_density",
-            [10, 20, 30]
-        ),
-
-        thermal_density=payload.get(
-            "thermal_density",
-            [12, 18, 28]
-        ),
-
-        infrared_density=payload.get(
-            "infrared_density",
-            [11, 19, 27]
-        ),
-
-        flow_vectors=payload.get(
-            "flow_vectors",
-            [
-                [1, 0],
-                [0, 1]
-            ]
-        ),
-
-        turbulence_score=payload.get(
-            "turbulence_score",
-            12
-        )
+@router.post("/", operation_id="calculate_risk")
+async def calculate_risk(payload: RiskRequest):
+    return risk_service.calculate_risk(
+        density_map=payload.density_map,
+        turbulence_score=payload.turbulence_score,
+        fusion_confidence=payload.fusion_confidence,
+        sensor_health=payload.sensor_health
     )
-
-    return result

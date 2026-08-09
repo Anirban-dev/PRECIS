@@ -1,8 +1,9 @@
 import subprocess
 import sys
+import os
 
 from backend.services.camera_registry import (
-    CameraRegistry
+    get_camera_registry
 )
 
 from cv_engine.camera.camera_manager import (
@@ -16,7 +17,7 @@ class CameraService:
 
         self.process = None
 
-        self.registry = CameraRegistry()
+        self.registry = get_camera_registry()
 
         self.manager = CameraManager()
 
@@ -56,12 +57,23 @@ class CameraService:
             [
                 sys.executable,
                 "-m",
-                "cv_engine.camera.camera_stream"
-            ]
+                "cv_engine.camera.camera_stream",
+                "--source",
+                str(source),
+                "--camera-id",
+                str(camera_id),
+                "--headless"
+            ],
+            env={
+                **os.environ,
+                "PRECIS_CAMERA_SOURCE": str(source),
+                "PRECIS_CAMERA_ID": str(camera_id)
+            }
         )
 
         return {
             "success": True,
+            "message": "Camera started",
             "camera_id": camera_id,
             "source": source,
             "pid": self.process.pid

@@ -1,205 +1,196 @@
-import cv2
+import argparse
 import asyncio
 import logging
-import time  # Added for tracking metrics
+import os
+import platform
+import time
 
-from backend.api.routes.websocket_routes import manager
+import cv2
+
 from ai_engine.multispectral.thermal_detector import ThermalDetector
-from system_integration.predictive_pipeline import PredictivePipeline
-from backend.services.incident_service import IncidentService
+from backend.api.routes.websocket_routes import manager
 from backend.services.alert_service import AlertService
+from backend.services.incident_service import IncidentService
+from system_integration.predictive_pipeline import PredictivePipeline
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class CameraStream:
-    def __init__(self, source=0):
+    def __init__(
+        self,
+        source=0,
+        camera_id="live_camera",
+        display=False,
+        process_every_n_frames=5,
+        max_read_failures=10,
+    ):
         self.source = source
+        self.camera_id = camera_id
+        self.display = display
+        self.process_every_n_frames = max(1, int(process_every_n_frames))
+        self.max_read_failures = max(1, int(max_read_failures))
         self.detector = ThermalDetector()
         self.pipeline = PredictivePipeline()
-
-        # Initialize services
         self.incident_service = IncidentService()
         self.alert_service = AlertService()
 
-    def start(self):
-        # Force DirectShow backend on Windows
-        cap = cv2.VideoCapture(self.source, cv2.CAP_DSHOW)
-
+    def _open_capture(self):
+        backend = cv2.CAP_DSHOW if platform.system() == "Windows" else cv2.CAP_ANY
+        cap = cv2.VideoCapture(self.source, backend)
         if not cap.isOpened():
-            logger.error("Failed to open camera")
-            return
+            logger.error("Failed to open camera source: %s", self.source)
+            return None
 
-        # Prevent OpenCV from buffering old frames to remove video processing lag
         cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
-
-        # Reduce downscaling resolution to optimize YOLO detection throughput
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        return cap
 
-        logger.info("Camera started... Press Q to quit.")
+    async def _broadcast(self, payload):
+        await manager.broadcast(payload)
 
-        # Performance Tuning: Throttling & Counter Initialization
+    def _broadcast_safely(self, payload):
+        try:
+            asyncio.run(self._broadcast(payload))
+        except RuntimeError:
+            logger.warning("Skipping camera broadcast because an event loop is already running")
+        except Exception:
+            logger.exception("WebSocket broadcast failed")
+
+    def _draw_overlay(self, frame, detections, density, risk_level, fps):
+        for detection in detections:
+            x1, y1, x2, y2 = map(int, detection["bbox"])
+            confidence = round(detection["confidence"], 2)
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            cv2.putText(
+                frame,
+                f"{confidence}",
+                (x1, y1 - 10),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                (0, 255, 0),
+                2,
+            )
+
+        cv2.putText(frame, f"Density: {density}", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        cv2.putText(frame, f"Risk: {risk_level}", (20, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        cv2.putText(frame, f"FPS: {int(fps)}", (20, 120), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+    def start(self):
+        cap = self._open_capture()
+        if cap is None:
+            return
+
         frame_count = 0
         last_detections = []
         last_broadcast = time.time()
-        
-        # Database Ingestion Throttling (10-second suppression window)
         last_incident_time = 0.0
         last_alert_time = 0.0
-
-        # Initialize baseline clock time for FPS calculation loop
         prev_time = time.time()
+        read_failures = 0
 
-        while True:
-            success, frame = cap.read()
-            if not success:
-                logger.error("Failed to read frame")
-                break
+        try:
+            while True:
+                success, frame = cap.read()
+                if not success:
+                    read_failures += 1
+                    logger.warning(
+                        "Failed to read frame %s/%s from %s",
+                        read_failures,
+                        self.max_read_failures,
+                        self.source,
+                    )
+                    if read_failures >= self.max_read_failures:
+                        logger.error("Stopping camera after repeated read failures")
+                        break
+                    time.sleep(0.2)
+                    continue
 
-            # Live frame-by-frame FPS delta computation using safe denominator capping
-            current_time = time.time()
-            fps = 1 / max(current_time - prev_time, 0.001)
-            prev_time = current_time
+                read_failures = 0
+                frame_count += 1
+                current_time = time.time()
+                fps = 1 / max(current_time - prev_time, 0.001)
+                prev_time = current_time
 
-            frame_count += 1
+                if frame_count % self.process_every_n_frames == 0:
+                    try:
+                        last_detections = self.detector.detect(frame)
+                    except Exception:
+                        logger.exception("YOLO detection failed")
+                        last_detections = []
 
-            # Throttled dimension verification
-            if frame_count % 100 == 0:
-                logger.info(f"Frame shape: {frame.shape}")
-                logger.info("Frame received")
-
-            # Frame skipping layout to drop AI inference usage by ~66%
-            try:
-                if frame_count % 3 == 0:
-                    last_detections = self.detector.detect(frame)
-                    if frame_count % 100 == 0:
-                        logger.info("YOLO executed")
-                
-                detections = last_detections
-            except Exception as e:
-                logger.exception("YOLO detection failed")
-                continue
-
-            density = len(detections)
-            if frame_count % 100 == 0:
-                logger.info(f"Person count: {density}")
-
-            # Draw detection boxes
-            for detection in detections:
-                x1, y1, x2, y2 = map(int, detection["bbox"])
-                confidence = round(detection["confidence"], 2)
-
-                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                cv2.putText(
-                    frame,
-                    f"{confidence}",
-                    (x1, y1 - 10),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.5,
-                    (0, 255, 0),
-                    2
+                density = len(last_detections)
+                result = self.pipeline.execute(
+                    rgb_density=[density, density, density],
+                    thermal_density=[density, density, density],
+                    infrared_density=[density, density, density],
+                    flow_vectors=[[1, 0], [0, 1]],
+                    turbulence_score=density,
                 )
+                risk_level = result["risk"]["risk_level"]
 
-            result = self.pipeline.execute(
-                rgb_density=[density, density, density],
-                thermal_density=[density, density, density],
-                infrared_density=[density, density, density],
-                flow_vectors=[[1, 0], [0, 1]],
-                turbulence_score=density
-            )
-
-            risk_level = result["risk"]["risk_level"]
-            print("RISK SCORE:", risk_level)
-            logger.info(f"Risk score: {risk_level}")
-
-            # Context-aware pipeline allocation with 10-second database suppression
-            if risk_level in ["MEDIUM", "HIGH", "CRITICAL"]:
-                current_ts = time.time()
-                
-                # Suppress incident DB insertions unless 10 seconds have elapsed
-                if current_ts - last_incident_time > 10.0:
-                    incident = self.incident_service.create_incident(
-                        camera_id="live_camera",
-                        density=density,
-                        risk_level=risk_level
-                    )
-                    logger.info(f"INCIDENT CREATED: {incident}")
-                    last_incident_time = current_ts
-
-                # Suppress alert notifications unless 10 seconds have elapsed
-                if current_ts - last_alert_time > 10.0:
-                    alert = self.alert_service.create_alert(
-                        camera_id="live_camera",
-                        risk_level=risk_level
-                    )
-                    logger.info(f"ALERT CREATED: {alert}")
-                    last_alert_time = current_ts
-
-            # Broadcast rate handling to enforce a max 1Hz socket update frequency
-            if time.time() - last_broadcast > 1.0:
-                try:
-                    asyncio.run(
-                        manager.broadcast(
-                            {
-                                "event": "camera_prediction",
-                                "density": density,
-                                "risk": risk_level,
-                                "prediction": result
-                            }
+                if risk_level in ["MEDIUM", "HIGH", "CRITICAL"]:
+                    now = time.time()
+                    if now - last_incident_time > 10.0:
+                        incident = self.incident_service.create_incident(
+                            camera_id=self.camera_id,
+                            density=density,
+                            risk_level=risk_level,
                         )
+                        logger.info("Incident created: %s", incident)
+                        last_incident_time = now
+
+                    if now - last_alert_time > 10.0:
+                        alert = self.alert_service.create_alert(
+                            camera_id=self.camera_id,
+                            risk_level=risk_level,
+                        )
+                        logger.info("Alert created: %s", alert)
+                        last_alert_time = now
+
+                if time.time() - last_broadcast > 1.0:
+                    self._broadcast_safely(
+                        {
+                            "event": "camera_prediction",
+                            "data": {
+                                "camera_id": self.camera_id,
+                                "density": density,
+                                "risk_level": risk_level,
+                                "prediction": result,
+                            },
+                        }
                     )
-                except Exception as e:
-                    logger.error(f"WebSocket Broadcast Error: {str(e)}")
-                
-                last_broadcast = time.time()
+                    last_broadcast = time.time()
 
-            # Density overlay (placed at the top stack)
-            cv2.putText(
-                frame,
-                f"Density: {density}",
-                (20, 40),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                1,
-                (0, 0, 255),
-                2
-            )
-
-            # Risk overlay (placed in the middle stack)
-            cv2.putText(
-                frame,
-                f"Risk: {risk_level}",
-                (20, 80),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                1,
-                (0, 0, 255),
-                2
-            )
-
-            # Loop Update: Render FPS Counter overlay layout at target coordinate
-            cv2.putText(
-                frame,
-                f"FPS: {int(fps)}",
-                (20, 120),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                1,
-                (0, 255, 0),
-                2
-            )
-
-            cv2.imshow("PRECIS Camera", frame)
-
-            print("PREDICTION:", result)
-            logger.info("\nPrediction Result:")
-            logger.info(result)
-
-            key = cv2.waitKey(1)
-            if key == ord("q"):
-                break
-
-        cap.release()
-        cv2.destroyAllWindows()
+                if self.display:
+                    self._draw_overlay(frame, last_detections, density, risk_level, fps)
+                    cv2.imshow("PRECIS Camera", frame)
+                    if cv2.waitKey(1) == ord("q"):
+                        break
+        finally:
+            cap.release()
+            if self.display:
+                cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
-    CameraStream().start()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--source", default=os.getenv("PRECIS_CAMERA_SOURCE", "0"))
+    parser.add_argument("--camera-id", default=os.getenv("PRECIS_CAMERA_ID", "live_camera"))
+    parser.add_argument("--headless", action="store_true")
+    parser.add_argument(
+        "--process-every-n-frames",
+        type=int,
+        default=int(os.getenv("PRECIS_CAMERA_PROCESS_EVERY_N_FRAMES", "5")),
+    )
+    args = parser.parse_args()
+    source = int(args.source) if str(args.source).isdigit() else args.source
+
+    CameraStream(
+        source=source,
+        camera_id=args.camera_id,
+        display=not args.headless,
+        process_every_n_frames=args.process_every_n_frames,
+    ).start()

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import router
-from websocket_gateway import websocket_router
+from gateway.routes import router
+from gateway.websocket_gateway import websocket_router
 import logging
 
 logging.basicConfig(
@@ -27,32 +27,23 @@ app.add_middleware(
 app.include_router(router)
 app.include_router(websocket_router)
 
+
 @app.get("/")
 async def root():
-
-    logger.info(
-        "PRECIS Gateway initialized."
-    )
+    logger.info("PRECIS Gateway initialized.")
 
     return {
-
         "system": "PRECIS",
-
         "status": "ACTIVE"
     }
 
 
 if __name__ == "__main__":
-
     import uvicorn
 
     uvicorn.run(
-
-        "main:app",
-
+        "gateway.main:app",
         host="0.0.0.0",
-
-        port=8000,
-
+        port=8080,
         reload=True
     )

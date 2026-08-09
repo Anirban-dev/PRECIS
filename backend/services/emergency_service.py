@@ -9,7 +9,19 @@ class EmergencyService:
 
         recommendations = []
 
-        if str(risk_level).upper() == "HIGH":
+        normalized_risk = str(risk_level).upper()
+        normalized_sensor = str(sensor_health).upper()
+
+        if normalized_risk == "CRITICAL":
+            recommendations.extend([
+                "Activate emergency response team immediately",
+                "Open evacuation routes for the affected sector",
+                "Dispatch crowd control personnel to pressure points",
+                "Issue urgent public safety announcements",
+                "Notify incident commander"
+            ])
+
+        elif normalized_risk == "HIGH":
 
             recommendations.extend([
                 "Activate emergency response team",
@@ -18,7 +30,7 @@ class EmergencyService:
                 "Monitor evacuation routes"
             ])
 
-        elif str(risk_level).upper() == "MEDIUM":
+        elif normalized_risk == "MEDIUM":
 
             recommendations.extend([
                 "Increase monitoring frequency",
@@ -33,7 +45,7 @@ class EmergencyService:
                 "Maintain routine monitoring"
             ])
 
-        if str(sensor_health).upper() != "HEALTHY":
+        if normalized_sensor != "HEALTHY":
 
             recommendations.append(
                 "Inspect and recalibrate sensors"
@@ -41,7 +53,8 @@ class EmergencyService:
 
         return {
             "sector_id": sector_id,
-            "risk_level": risk_level,
-            "sensor_health": sensor_health,
+            "risk_level": normalized_risk,
+            "sensor_health": normalized_sensor,
+            "priority": "IMMEDIATE" if normalized_risk == "CRITICAL" else normalized_risk,
             "recommendations": recommendations
         }
