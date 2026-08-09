@@ -6,7 +6,8 @@ import logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("cv-processor")
 
-GATEWAY_URL = "http://localhost:8000/api/ingest/audio"
+import os
+GATEWAY_URL = os.getenv("GATEWAY_URL", "http://localhost:8000/api/ingest/audio")
 
 def run_cv_processor():
     logger.info("Initializing OpenCV Optical Flow & Wave Analysis Engine...")

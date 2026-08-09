@@ -74,7 +74,7 @@ def main():
         subprocess.run(["npm", "install"], cwd=str(DASHBOARD_PATH), shell=True)
         print("[✓] React Dashboard packages setup complete.")
         
-        print_banner("SETUP SUCCESSFUL. RUN `python dev.py` TO START SERVICES.")
+        print_banner("SETUP SUCCESSFUL. RUN `python scripts/dev.py` TO START SERVICES.")
         return
 
     processes = []
