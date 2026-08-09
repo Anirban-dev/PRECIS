@@ -1,21 +1,50 @@
 version: "3.9"
 
 services:
-  precis:
+  # Central FastAPI coordination gateway
+  api-gateway:
     build:
-      context: .
+      context: ./services/api-gateway
       dockerfile: Dockerfile
-
-    container_name: precis
-
+    container_name: precis-api-gateway
     ports:
       - "8000:8000"
-
-    volumes:
-      - .:/app
-
     restart: unless-stopped
 
-    stdin_open: true
+  # YOLO camera detection simulator
+  yolo-detector:
+    build:
+      context: ./ai_engine/yolo
+      dockerfile: Dockerfile
+    container_name: precis-yolo-detector
+    depends_on:
+      - api-gateway
+    environment:
+      # Override simulator endpoint to point to container gateway
+      - GATEWAY_URL=http://api-gateway:8000/api/ingest/yolo
+    restart: unless-stopped
 
-    tty: true
+  # OpenCV Optical flow / audio anomaly simulator
+  cv-processor:
+    build:
+      context: ./cv-engine/optical-flow
+      dockerfile: Dockerfile
+    container_name: precis-cv-processor
+    depends_on:
+      - api-gateway
+    environment:
+      # Override simulator endpoint to point to container gateway
+      - GATEWAY_URL=http://api-gateway:8000/api/ingest/audio
+    restart: unless-stopped
+
+  # React Dashboards frontend UI
+  dashboard:
+    build:
+      context: ./apps/dashboard
+      dockerfile: Dockerfile
+    container_name: precis-dashboard
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api-gateway
+    restart: unless-stopped

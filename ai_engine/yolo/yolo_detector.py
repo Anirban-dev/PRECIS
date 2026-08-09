@@ -8,7 +8,8 @@ import logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("yolo-detector")
 
-GATEWAY_URL = "http://localhost:8000/api/ingest/yolo"
+import os
+GATEWAY_URL = os.getenv("GATEWAY_URL", "http://localhost:8000/api/ingest/yolo")
 
 async def run_detector():
     logger.info("Initializing YOLOv8 Detector skeleton...")
