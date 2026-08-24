@@ -26,6 +26,12 @@ idna==3.18
     # via anyio
 nats-py==2.15.0
     # via api-gateway (pyproject.toml)
+numpy==2.5.2
+    # via
+    #   api-gateway (pyproject.toml)
+    #   opencv-python
+opencv-python==5.0.0.93
+    # via api-gateway (pyproject.toml)
 packaging==26.3
     # via aiokafka
 pydantic==2.13.4
@@ -36,6 +42,8 @@ pydantic-core==2.46.4
     # via pydantic
 python-dotenv==1.2.2
     # via uvicorn
+python-multipart==0.0.32
+    # via api-gateway (pyproject.toml)
 pyyaml==6.0.3
     # via uvicorn
 starlette==1.6.0

@@ -11,4 +11,7 @@ dependencies = [
     "websockets>=11.0",
     "nats-py>=2.4.0",
     "aiokafka>=0.8.1",
+    "python-multipart>=0.0.9",
+    "opencv-python>=4.8.0",
+    "numpy>=1.24.0",
 ]

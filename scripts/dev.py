@@ -30,6 +30,7 @@ def main():
     parser.add_argument("--ai", action="store_true", help="Start YOLO & CV engines only")
     parser.add_argument("--ui", action="store_true", help="Start React Dashboard only")
     parser.add_argument("--all", action="store_true", help="Start all services (default)")
+    parser.add_argument("--with-sim", action="store_true", help="Enable internal sine-wave simulation in gateway (demo mode)")
     
     args = parser.parse_args()
     
@@ -81,9 +82,15 @@ def main():
     
     try:
         if args.gateway or args.all:
-            # Boot FastAPI server
+            # Boot FastAPI server - sim disabled by default (production), enabled with --with-sim or --all
+            env = os.environ.copy()
+            if args.with_sim or args.all:
+                env["PRECIS_SIMULATION"] = "1"
+            else:
+                env["PRECIS_SIMULATION"] = "0"
             gateway_cmd = ["uv", "run", "uvicorn", "main:app", "--port", "8000", "--reload"]
-            p_gate = run_command_in_bg(gateway_cmd, GATEWAY_PATH, "FastAPI Gateway (Port 8000)")
+            p_gate = subprocess.Popen(gateway_cmd, cwd=str(GATEWAY_PATH), shell=True, env=env)
+            print(f"[*] Starting FastAPI Gateway (Port 8000) [simulation={'ON' if env['PRECIS_SIMULATION']=='1' else 'OFF'}]...")
             processes.append(p_gate)
             time.sleep(2)  # Give gateway time to bind ports
 

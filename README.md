@@ -35,16 +35,29 @@ Run the manager script with the `--setup` flag. This will automatically compile 
 python scripts/dev.py --setup
 ```
 
-### ⚡ 2. Start All Services
-Launch the API Gateway, YOLO simulation, CV simulation, and the React frontend concurrently.
+### ⚡ 2. Start
+
+**Real video (no mocks) — recommended for testing your camera / uploads:**
+```bash
+python scripts/dev.py --gateway --ui
+```
+Dashboard at `http://localhost:3000` shows `SIMULATION` sine-wave until you click **Live Camera → Start Camera** (2 FPS webcam via `WS frame`) or **Recorded Video → upload .mp4** (5 FPS processing). Simulation auto-pauses when real video is active.
+
+**Demo with mocks (investor mode):**
 ```bash
 python scripts/dev.py
+# = --all: gateway + YOLO mock (POST /api/ingest/yolo) + CV mock (POST /api/ingest/audio) + UI
+# You will see `POST /api/ingest/yolo 200 OK` / `POST /api/ingest/audio 200 OK` even before opening the browser — that is expected.
 ```
-This starts:
-- **FastAPI API Gateway** at [http://localhost:8000](http://localhost:8000)
-- **Vite React Dashboard UI** at [http://localhost:3000](http://localhost:3000)
-- **YOLO Video Detector Simulator** sending logs to the gateway.
-- **OpenCV Optical Flow Simulator** sending logs to the gateway.
+
+**Other modes:**
+```bash
+python scripts/dev.py --gateway   # backend only
+python scripts/dev.py --ai        # mocks only
+python scripts/dev.py --ui        # frontend only
+```
+
+> Full matrix of Mock vs Real, endpoints, and test commands → see `docs/RUNBOOK.md`.
 
 ---
 
